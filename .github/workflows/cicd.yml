@@ -110,7 +110,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: tittuak/bankapp:latest
+          tags: tittuak/webapp:latest
           file: ./Dockerfile
   deploy_to_kubernetes:
     runs-on: self-hosted
