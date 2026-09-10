@@ -93,7 +93,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
 
-  buils_docker_image_and_push:
+  build_docker_image_and_push:
     runs-on: self-hosted
     needs: build_project_and_sonar_scan
     steps:
@@ -127,17 +127,10 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-  deploy_to_kubernetes:
-    runs-on: self-hosted
-    needs: buils_docker_image_and_push
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Install or Update AWS CLI
-        run: |
+    - name: Install or Update AWS CLI
+      run: |
           if command -v aws &> /dev/null; then
-            echo "AWS CLI already installed, updating..."
+           echo "AWS CLI already installed, updating..."
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip -o awscliv2.zip
             sudo ./aws/install --update
@@ -148,21 +141,21 @@ jobs:
             sudo ./aws/install
           fi
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
+     - name: Set up kubectl
+       uses: azure/setup-kubectl@v3
+       with:
           version: latest
 
-      - name: Configure kubeconfig
-        run: aws eks update-kubeconfig --name devekscluster --region ap-south-1
+     - name: Configure kubeconfig
+      run: aws eks update-kubeconfig --name devekscluster --region ap-south-1
 
-      - name: Deploy to EKS
-        run: kubectl apply -f ds.yml
+     - name: Deploy to EKS
+      run: kubectl apply -f ds.yml
   
